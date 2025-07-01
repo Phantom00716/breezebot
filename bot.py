@@ -29,8 +29,7 @@ def show_contacts(message):
     markup.add(
         types.InlineKeyboardButton("📞 Позвонить", url="tel:+998994449959"),
         types.InlineKeyboardButton("💬 Telegram", url="https://t.me/breeztashmore")
-    )
-    bot.send_message(message.chat.id, "📍 Администратор: +998 99 444 99 59", reply_markup=markup)
+    bot.send_message(message.chat.id, "📍 Администратор: +998 99 444 99 59", reply_markup=markup))
 
 @bot.message_handler(func=lambda m: m.text == "🏠 Размещение")
 def show_accommodation(message):
