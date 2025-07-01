@@ -38,9 +38,9 @@ def show_contacts(message):
 def show_accommodation(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🏡 Коттеджи", "🛏 Стандартные номера")
-    markup.add("🌅 Топчаны")
+    markup.add("🌅 Топчаны", "🍽 Столики", "🧖‍♀️ Сауна")
     markup.add("🔙 Назад в меню")
-    bot.send_message(message.chat.id, "Выберите тип размещения:", reply_markup=markup)
+    bot.send_message(message.chat.id, "Выберите тип размещения или дополнительную зону:", reply_markup=markup)
 
 @bot.message_handler(func=lambda m: m.text == "🔙 Назад в меню")
 def back_to_main_menu(message):
@@ -127,16 +127,35 @@ def topchan_with_pool(message):
     bot.send_message(message.chat.id,
         "🏖 Топчан с бассейном:\n"
         "— До 6 человек\n"
+        "— ✅ Доступ к бассейну\n"
+        "— Столик включён\n"
         "— Цена: 500 000 сум / день"
-        "— Доступ к бассейну"
     )
 
-@bot.message_handler(func=lambda m: m.text == "🪵 Топчан")
+@bot.message_handler(func=lambda m: m.text == "🪵 Простой топчан")
 def topchan_simple(message):
     bot.send_message(message.chat.id,
-        "🪵 Топчан:\n"
+        "🪵 Простой топчан:\n"
         "— До 6 человек\n"
         "— Цена: 350 000 сум / день"
+    )
+
+# --- Сауна ---
+@bot.message_handler(func=lambda m: m.text == "🧖‍♀️ Сауна")
+def sauna_info(message):
+    bot.send_message(message.chat.id,
+        "🧖‍♀️ Сауна:\n"
+        "— Вместимость: до 6 человек\n"
+        "— Цена: 300 000 сум / 1 час"
+    )
+
+# --- Столики ---
+@bot.message_handler(func=lambda m: m.text == "🍽 Столики")
+def table_info(message):
+    bot.send_message(message.chat.id,
+        "🍽 Столик на пирсе:\n"
+        "— До 6 человек\n"
+        "— Цена: 250 000 сум / день"
     )
 
 # Вебхук
@@ -147,6 +166,6 @@ def webhook():
     bot.process_new_updates([update])
     return 'ok', 200
 
-# Запуск Flask-сервера
+# Запуск сервера
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
