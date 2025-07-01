@@ -48,5 +48,5 @@ def webhook():
 
 if __name__ == '__main__':
     bot.remove_webhook()
-    bot.set_webhook(url= https://breezebot-vrsm.onrender.com )  # Замени на точную ссылку из Render
-    app.run(host='0.0.0.0', port=10000)
+   bot.set_webhook(url="https://breezebot-vrsm.onrender.com")
+     app.run(host='0.0.0.0', port=10000)
