@@ -1,97 +1,73 @@
 import telebot
 from telebot import types
-from flask import Flask, request
 
-bot = telebot.TeleBot("7076217052:AAHQyKdKEwdd5qwMtNvu3dWAq_78eHbzn9Y")
-bot.set_webhook(url="https://breezebot-vrsm.onrender.com")
+# Токен бота
+TOKEN = '7076217052:AAHQyKdKEwdd5qwMtNvu3dWAq_78eHbzn9Y'
+bot = telebot.TeleBot(TOKEN)
 
-app = Flask(__name__)
-
-@bot.message_handler(commands=["start"])
-def send_welcome(message):
+# Главное меню
+def main_menu():
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add("📋 Меню", "💰 Прейскурант цен", "📞 Контакты", "🏡 Размещение")
-    # Send welcome message twice (duplicate send preserved)
-    bot.send_message(message.chat.id, "Добро пожаловать в 'Бриз'! Выберите нужный раздел:", reply_markup=markup)
-    bot.send_message(message.chat.id, "Добро пожаловать в 'Бриз'! Выберите нужный раздел:", reply_markup=markup)
+    markup.row("🏡 Размещение", "🍽 Меню")
+    markup.row("💰 Прейскурант цен", "📸 Фото")
+    markup.row("📞 Контакты")
+    return markup
 
-@bot.message_handler(func=lambda m: m.text == "📋 Меню")
-def show_menu(message):
-    # Open and send the menu photo twice
-    with open("menu.jpg", "rb") as photo:
-        bot.send_photo(message.chat.id, photo, caption="🧾 Меню кафе\n☝️ Обслуживание: 15%")
-    with open("menu.jpg", "rb") as photo:
-        bot.send_photo(message.chat.id, photo, caption="🧾 Меню кафе\n☝️ Обслуживание: 15%")
+@bot.message_handler(commands=['start'])
+def start_message(message):
+    bot.send_message(message.chat.id, "🌟 Добро пожаловать в зону отдыха Бриз!\n🌊 Выберите нужный раздел ниже:", reply_markup=main_menu())
 
-@bot.message_handler(func=lambda m: m.text == "💰 Прейскурант цен")
-def show_prices(message):
-    # Open and send the prices photo twice
-    with open("prices.jpg", "rb") as photo:
-        bot.send_photo(message.chat.id, photo, caption="💰 Летние цены 2025 (май – август)\n📌 Все цены на фото ниже")
-    with open("prices.jpg", "rb") as photo:
-        bot.send_photo(message.chat.id, photo, caption="💰 Летние цены 2025 (май – август)\n📌 Все цены на фото ниже")
+@bot.message_handler(func=lambda message: True)
+def menu_handler(message):
+    if message.text == "🏡 Размещение":
+        markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton("Коттеджи", callback_data='cottages'))
+        markup.add(types.InlineKeyboardButton("Стандартные номера", callback_data='rooms'))
+        markup.add(types.InlineKeyboardButton("Топчаны", callback_data='topchan'))
+        markup.add(types.InlineKeyboardButton("Столики", callback_data='tables'))
+        markup.add(types.InlineKeyboardButton("Сауна", callback_data='sauna'))
+        bot.send_message(message.chat.id, "🏡 Выберите тип размещения:", reply_markup=markup)
 
-@bot.message_handler(func=lambda m: m.text == "📞 Контакты")
-def show_contacts(message):
-    markup = types.InlineKeyboardMarkup()
-    # Add two inline buttons: "Позвонить" and two "Написать в Telegram" (duplicate button preserved)
-    markup.add(
-        types.InlineKeyboardButton("📲 Позвонить", url="tel:+998994449959"),
-        types.InlineKeyboardButton("💬 Написать в Telegram", url="https://t.me/breeztashmore"),
-        types.InlineKeyboardButton("💬 Написать в Telegram", url="https://t.me/breeztashmore")
-    )
-    # Send contact info message twice (duplicate send preserved)
-    bot.send_message(message.chat.id, "📞 Администратор: +998 99 444 99 59", reply_markup=markup)
-    bot.send_message(message.chat.id, "📞 Администратор: +998 99 444 99 59", reply_markup=markup)
+    elif message.text == "🍽 Меню":
+        photo = open("menu.jpg", "rb")
+        bot.send_photo(message.chat.id, photo, caption="🍽 Меню кафе.\n📌 Все цены указаны на изображении.\n☝️ Обслуживание: 15%")
+        photo.close()
 
-@bot.message_handler(func=lambda m: m.text == "🏡 Размещение")
-def show_accommodation(message):
-    # Multi-line text for accommodation details, with proper newline characters
-    text = (
-        "🏡 Размещение:\n"
-        "🏠 Коттеджи:\n"
-        "🔹 2-местный — 850 000 сум (вых), 750 000 (будни)\n"
-        "🔹 4-местный — 1 100 000 сум (вых), 1 000 000 (будни)\n"
-        "🔹 5-местный — 1 900 000 сум (вых), 1 600 000 (будни)\n"
-        "⏰ Заезд/выезд: 10:00 (на сутки)\n"
-        "🏊‍♂ Доступ к бассейну\n"
-        "🍳 Мангал и казан\n"
-        "🧺 Своя еда разрешена\n"
-        "📸 Фото: https://t.me/breezuzb/525?single, https://t.me/breezuzb/536, https://t.me/breezuzb/520\n\n"
-        "🛏 Стандартные номера:\n"
-        "🔹 2-местный — 650 000 сум (вых), 550 000 (будни)\n"
-        "🔹 4-местный — 900 000 сум (вых), 850 000 (будни)\n"
-        "⏰ Заезд/выезд: 10:00 (на сутки)\n"
-        "🏊‍♂ Доступ к бассейну\n"
-        "🍳 Мангал и казан\n"
-        "🧺 Своя еда разрешена\n"
-        "📸 Фото: https://t.me/breezuzb/533, https://t.me/breezuzb/529?single\n\n"
-        "🏖 Топчаны:\n"
-        "🔹 С бассейном — 500 000 сум/день\n"
-        "🔹 Без доступа — 350 000 сум/день\n"
-        "⏰ Время: 09:00–19:00\n"
-        "🍳 Мангал и казан\n"
-        "🧺 Своя еда разрешена\n"
-        "📸 Фото: https://t.me/breezuzb/788\n\n"
-        "🍽 Столики:\n"
-        "💵 250 000 сум/день\n"
-        "⏰ Время: 09:00–19:00\n"
-        "🍳 Мангал и казан\n"
-        "🧺 Своя еда разрешена\n"
-        "📸 Фото: https://t.me/breezuzb/791\n\n"
-        "♨️ Сауна:\n"
-        "💵 300 000 сум/час\n"
-        "👥 До 6 человек\n"
-        "📸 Фото: https://t.me/BreezTashMoreUzbekistan/32955"
-    )
-    bot.send_message(message.chat.id, text)
+    elif message.text == "💰 Прейскурант цен":
+        photo = open("prices.jpg", "rb")
+        bot.send_photo(message.chat.id, photo, caption="💰 Летние цены 2025 (май – август)")
+        photo.close()
 
-@app.route('/', methods=['POST'])
-def webhook():
-    json_str = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_str)
-    bot.process_new_updates([update])
-    return 'ok', 200
+    elif message.text == "📸 Фото":
+        bot.send_message(message.chat.id, "📸 Фото по разделам доступны в нашем Instagram/канале")
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    elif message.text == "📞 Контакты":
+        bot.send_message(
+            message.chat.id,
+            "📞 Связаться с нами:\n📱 +998 99 444 99 59\n🔗 Telegram: @breeztashmore",
+            reply_markup=types.InlineKeyboardMarkup().add(
+                types.InlineKeyboardButton("📞 Позвонить", url="tel:+998994449959"),
+                types.InlineKeyboardButton("💬 Написать в Telegram", url="https://t.me/breeztashmore")
+            )
+        )
+
+# Обработчик инлайн-кнопок (заглушка)
+@bot.callback_query_handler(func=lambda call: True)
+def callback_handler(call):
+    text = "🌊 Здесь будет информация о "
+    if call.data == 'cottages':
+        text += "коттеджах"
+    elif call.data == 'rooms':
+        text += "номерах"
+    elif call.data == 'topchan':
+        text += "топчанах"
+    elif call.data == 'tables':
+        text += "столиках"
+    elif call.data == 'sauna':
+        text += "сауне"
+    bot.answer_callback_query(call.id)
+    bot.send_message(call.message.chat.id, text)
+
+# Запуск бота
+print("Bot is running...")
+bot.polling(none_stop=True)
