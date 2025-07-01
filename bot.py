@@ -1,73 +1,64 @@
 import telebot
 from telebot import types
+from flask import Flask, request
 
-# Токен бота
-TOKEN = '7076217052:AAHQyKdKEwdd5qwMtNvu3dWAq_78eHbzn9Y'
-bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot("ТОКЕН_ЗДЕСЬ")  # Вставь свой Telegram Bot Token
+bot.set_webhook(url="https://breezebot-vrsm.onrender.com")  # Твоя ссылка Render
 
-# Главное меню
-def main_menu():
+app = Flask(__name__)
+
+@bot.message_handler(commands=["start"])
+def send_welcome(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.row("🏡 Размещение", "🍽 Меню")
-    markup.row("💰 Прейскурант цен", "📸 Фото")
-    markup.row("📞 Контакты")
-    return markup
+    markup.add("📋 Меню", "💰 Прейскурант цен", "📞 Контакты", "🏠 Размещение")
+    bot.send_message(message.chat.id, "Добро пожаловать в 'Бриз'! Выберите нужный раздел:", reply_markup=markup)
 
-@bot.message_handler(commands=['start'])
-def start_message(message):
-    bot.send_message(message.chat.id, "🌟 Добро пожаловать в зону отдыха Бриз!\n🌊 Выберите нужный раздел ниже:", reply_markup=main_menu())
+@bot.message_handler(func=lambda m: m.text == "📋 Меню")
+def show_menu(message):
+    with open("menu.jpg", "rb") as photo:
+        bot.send_photo(message.chat.id, photo, caption="🧾 Меню кафе\nОбслуживание: 15%")
 
-@bot.message_handler(func=lambda message: True)
-def menu_handler(message):
-    if message.text == "🏡 Размещение":
-        markup = types.InlineKeyboardMarkup()
-        markup.add(types.InlineKeyboardButton("Коттеджи", callback_data='cottages'))
-        markup.add(types.InlineKeyboardButton("Стандартные номера", callback_data='rooms'))
-        markup.add(types.InlineKeyboardButton("Топчаны", callback_data='topchan'))
-        markup.add(types.InlineKeyboardButton("Столики", callback_data='tables'))
-        markup.add(types.InlineKeyboardButton("Сауна", callback_data='sauna'))
-        bot.send_message(message.chat.id, "🏡 Выберите тип размещения:", reply_markup=markup)
+@bot.message_handler(func=lambda m: m.text == "💰 Прейскурант цен")
+def show_prices(message):
+    with open("prices.jpg", "rb") as photo:
+        bot.send_photo(message.chat.id, photo, caption="📌 Летние цены 2025 (май – август)")
 
-    elif message.text == "🍽 Меню":
-        photo = open("menu.jpg", "rb")
-        bot.send_photo(message.chat.id, photo, caption="🍽 Меню кафе.\n📌 Все цены указаны на изображении.\n☝️ Обслуживание: 15%")
-        photo.close()
+@bot.message_handler(func=lambda m: m.text == "📞 Контакты")
+def show_contacts(message):
+    markup = types.InlineKeyboardMarkup()
+    markup.add(
+        types.InlineKeyboardButton("📞 Позвонить", url="tel:+998994449959"),
+        types.InlineKeyboardButton("💬 Telegram", url="https://t.me/breeztashmore")
+    )
+    bot.send_message(message.chat.id, "📍 Администратор: +998 99 444 99 59", reply_markup=markup)
 
-    elif message.text == "💰 Прейскурант цен":
-        photo = open("prices.jpg", "rb")
-        bot.send_photo(message.chat.id, photo, caption="💰 Летние цены 2025 (май – август)")
-        photo.close()
+@bot.message_handler(func=lambda m: m.text == "🏠 Размещение")
+def show_accommodation(message):
+    text = (
+        "🏡 Размещение:\n\n"
+        "— Коттеджи:\n"
+        "  • 3 четырёхместных\n"
+        "  • 2 пятиместных\n"
+        "  • 7 двухместных\n"
+        "  ➕ Доступ к бассейну\n\n"
+        "— Номера:\n"
+        "  • 8 двухместных\n"
+        "  • 4 четырёхместных\n"
+        "  ➕ Доступ к бассейну\n\n"
+        "— Топчаны у воды:\n"
+        "  • Все с бассейном и столиками\n\n"
+        "🧖‍♀️ Сауна: 300 000 сум/час (до 6 человек)"
+    )
+    bot.send_message(message.chat.id, text)
 
-    elif message.text == "📸 Фото":
-        bot.send_message(message.chat.id, "📸 Фото по разделам доступны в нашем Instagram/канале")
+# Обработка вебхука
+@app.route('/', methods=['POST'])
+def webhook():
+    json_str = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_str)
+    bot.process_new_updates([update])
+    return 'ok', 200
 
-    elif message.text == "📞 Контакты":
-        bot.send_message(
-            message.chat.id,
-            "📞 Связаться с нами:\n📱 +998 99 444 99 59\n🔗 Telegram: @breeztashmore",
-            reply_markup=types.InlineKeyboardMarkup().add(
-                types.InlineKeyboardButton("📞 Позвонить", url="tel:+998994449959"),
-                types.InlineKeyboardButton("💬 Написать в Telegram", url="https://t.me/breeztashmore")
-            )
-        )
-
-# Обработчик инлайн-кнопок (заглушка)
-@bot.callback_query_handler(func=lambda call: True)
-def callback_handler(call):
-    text = "🌊 Здесь будет информация о "
-    if call.data == 'cottages':
-        text += "коттеджах"
-    elif call.data == 'rooms':
-        text += "номерах"
-    elif call.data == 'topchan':
-        text += "топчанах"
-    elif call.data == 'tables':
-        text += "столиках"
-    elif call.data == 'sauna':
-        text += "сауне"
-    bot.answer_callback_query(call.id)
-    bot.send_message(call.message.chat.id, text)
-
-# Запуск бота
-print("Bot is running...")
-bot.polling(none_stop=True)
+# Запуск сервера
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
