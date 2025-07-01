@@ -25,11 +25,15 @@ def show_prices(message):
 
 @bot.message_handler(func=lambda m: m.text == "📞 Контакты")
 def show_contacts(message):
-    markup = types.InlineKeyboardMarkup()
-    markup.add(
-        types.InlineKeyboardButton("📞 Позвонить", url="tel:+998994449959"),
-        types.InlineKeyboardButton("💬 Telegram", url="https://t.me/breeztashmore")
-    bot.send_message(message.chat.id, "📍 Администратор: +998 99 444 99 59", reply_markup=markup))
+    text = (
+        "📞 *Контакты*\n"
+        "📱 *Администратор:*\n"
+        "`+998 99 444 99 59`\n\n"
+        "📲 [Позвонить](tel:+998994449959)\n"
+        "💬 [Написать в Telegram](https://t.me/breeztashmore)"
+    )
+    bot.send_message(message.chat.id, text, parse_mode="Markdown")
+
 
 @bot.message_handler(func=lambda m: m.text == "🏠 Размещение")
 def show_accommodation(message):
