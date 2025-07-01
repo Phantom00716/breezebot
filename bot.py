@@ -2,7 +2,7 @@ import telebot
 from telebot import types
 from flask import Flask, request
 
-bot = telebot.TeleBot("ТОКЕН_ЗДЕСЬ")  # Вставь свой Telegram Bot Token
+bot = telebot.TeleBot("7076217052:AAHQyKdKEwdd5qwMtNvu3dWAq_78eHbzn9Y")  # Вставь свой Telegram Bot Token
 bot.set_webhook(url="https://breezebot-vrsm.onrender.com")  # Твоя ссылка Render
 
 app = Flask(__name__)
