@@ -27,8 +27,7 @@ def show_accommodation(message):
 @bot.message_handler(func=lambda m: m.text == "🍽 Меню")
 def show_menu(message):
     with open("menu.jpg", "rb") as photo:
-        bot.send_photo(message.chat.id, photo, caption="🧾 Меню кафе
-Обслуживание: 15%")
+        bot.send_photo(message.chat.id, photo, caption="🧾 Меню кафе Обслуживание: 15%")
 
 @bot.message_handler(func=lambda m: m.text == "💰 Прейскурант цен")
 def show_prices(message):
